@@ -21,6 +21,7 @@ $name = htmlspecialchars($_SESSION['name'] ?? '', ENT_QUOTES, 'UTF-8');
                     <li class="nav-item"><span class="navbar-text text-white">ยินดีต้อนรับ, <?= $name ?></span></li>
                     <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
                         <li class="nav-item"><a class="nav-link" href="admin_dashboard.php">จัดการระบบ</a></li>
+                        <li class="nav-item"><a class="nav-link" href="admin_stores.php">จัดการร้านค้า</a></li>
                     <?php endif; ?>
                     <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="logout.php">ออกจากระบบ</a></li>
                 <?php endif; ?>

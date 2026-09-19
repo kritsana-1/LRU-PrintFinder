@@ -15,6 +15,7 @@ check_admin();
     <main class="container py-5">
         <h1 class="h3">แดชบอร์ดผู้ดูแลระบบ</h1>
         <p class="text-muted">หน้านี้เปิดให้เฉพาะผู้ใช้ที่มี role เป็น admin</p>
+        <a class="btn btn-primary" href="admin_stores.php">จัดการข้อมูลร้านค้าและสถานที่ตั้ง</a>
     </main>
 </body>
 </html>
