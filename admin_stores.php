@@ -16,17 +16,21 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>จัดการข้อมูลร้านค้า | LRU PrintFinder</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="admin.css">
 </head>
-<body class="bg-light">
+<body class="admin-body">
     <?php require __DIR__ . '/navbar.php'; ?>
-    <main class="container py-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-            <div>
-                <h1 class="h3 mb-1">จัดการข้อมูลร้านค้าและสถานที่ตั้ง</h1>
-                <p class="text-muted mb-0">Process 2.1 และ 2.3</p>
+    <div class="admin-shell d-lg-flex">
+        <?php require __DIR__ . '/admin_sidebar.php'; ?>
+        <main class="admin-content p-3 p-lg-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                <div>
+                    <h1 class="h3 fw-bold mb-1">Store Management</h1>
+                    <p class="text-muted mb-0">Registered and verified printing store</p>
+                </div>
+                <a class="btn btn-primary" href="store_form.php"><i class="bi bi-plus-lg me-2"></i>Add New Store</a>
             </div>
-            <a class="btn btn-primary" href="store_form.php">เพิ่มร้านค้าใหม่</a>
-        </div>
 
         <?php if ($flashSuccess): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -41,34 +45,43 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
             </div>
         <?php endif; ?>
 
-        <div class="card shadow-sm border-0">
+        <div class="card admin-card">
             <div class="card-body">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-5"><label class="visually-hidden" for="storeSearch">ค้นหาร้านค้า</label><div class="input-group"><span class="input-group-text bg-white"><i class="bi bi-search"></i></span><input type="search" class="form-control" id="storeSearch" placeholder="Search store"></div></div>
+                    <div class="col-md-3"><select class="form-select" id="storeFilter" aria-label="กรองร้านค้า"><option value="">All locations</option><option value="มหาวิทยาลัยราชภัฏเลย">ใกล้มหาวิทยาลัยราชภัฏเลย</option></select></div>
+                    <div class="col-md-auto"><button type="button" class="btn btn-primary" id="filterButton"><i class="bi bi-funnel me-2"></i>Filters</button></div>
+                </div>
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0" id="storeTable">
                         <thead>
                             <tr>
+                                <th><input class="form-check-input" type="checkbox" id="selectAll" aria-label="เลือกทั้งหมด"></th>
                                 <th>ลำดับ</th>
                                 <th>รหัสร้าน</th>
                                 <th>ชื่อร้าน</th>
                                 <th>ที่อยู่</th>
                                 <th>พิกัด (Lat, Long)</th>
+                                <th>สถานะ</th>
                                 <th class="text-nowrap">การจัดการ</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!$stores): ?>
-                                <tr><td colspan="6" class="text-center text-muted py-4">ยังไม่มีข้อมูลร้านค้า</td></tr>
+                                <tr><td colspan="8" class="text-center text-muted py-4">ยังไม่มีข้อมูลร้านค้า</td></tr>
                             <?php endif; ?>
                             <?php foreach ($stores as $index => $store): ?>
-                                <tr>
+                                <tr class="store-row">
+                                    <td><input class="form-check-input store-check" type="checkbox" aria-label="เลือกร้านค้า"></td>
                                     <td><?= $index + 1 ?></td>
                                     <td><?= (int) $store['Store_ID'] ?></td>
                                     <td><?= htmlspecialchars($store['Store_Name'], ENT_QUOTES, 'UTF-8') ?></td>
                                     <td><?= nl2br(htmlspecialchars($store['Address'], ENT_QUOTES, 'UTF-8')) ?></td>
                                     <td class="text-nowrap"><?= htmlspecialchars($store['Latitude'], ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars($store['Longitude'], ENT_QUOTES, 'UTF-8') ?></td>
+                                    <td><span class="badge rounded-pill text-bg-success">Active</span></td>
                                     <td class="text-nowrap">
-                                        <a class="btn btn-sm btn-outline-primary" href="store_form.php?id=<?= (int) $store['Store_ID'] ?>">แก้ไข</a>
-                                        <button class="btn btn-sm btn-outline-danger js-delete-store" type="button" data-id="<?= (int) $store['Store_ID'] ?>" data-name="<?= htmlspecialchars($store['Store_Name'], ENT_QUOTES, 'UTF-8') ?>">ลบ</button>
+                                        <a class="btn btn-sm btn-outline-primary" href="store_form.php?id=<?= (int) $store['Store_ID'] ?>">Edit</a>
+                                        <button class="btn btn-sm btn-outline-danger js-delete-store" type="button" data-id="<?= (int) $store['Store_ID'] ?>" data-name="<?= htmlspecialchars($store['Store_Name'], ENT_QUOTES, 'UTF-8') ?>">Deactivate</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -77,7 +90,8 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                 </div>
             </div>
         </div>
-    </main>
+        </main>
+    </div>
 
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -106,6 +120,22 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                 $('#deleteStoreId').val($(this).data('id'));
                 $('#deleteStoreName').text($(this).data('name'));
                 deleteModal.show();
+            });
+
+            function filterStores() {
+                const query = $('#storeSearch').val().toLowerCase();
+                const location = $('#storeFilter').val().toLowerCase();
+                $('.store-row').each(function () {
+                    const text = $(this).text().toLowerCase();
+                    $(this).toggle(text.includes(query) && (!location || text.includes(location)));
+                });
+            }
+
+            $('#storeSearch').on('input', filterStores);
+            $('#filterButton').on('click', filterStores);
+            $('#storeFilter').on('change', filterStores);
+            $('#selectAll').on('change', function () {
+                $('.store-check').prop('checked', this.checked);
             });
         });
     </script>

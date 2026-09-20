@@ -21,8 +21,14 @@ if ($storeId === false || $storeId < 1 || $storeName === '' || $address === '' |
     exit;
 }
 
-$stmt = $pdo->prepare('UPDATE `Store` SET Store_Name = ?, Description = ?, Address = ?, Latitude = ?, Longitude = ? WHERE Store_ID = ?');
-$stmt->execute([$storeName, $description !== '' ? $description : null, $address, $latitude, $longitude, $storeId]);
+try {
+    $stmt = $pdo->prepare('UPDATE `Store` SET Store_Name = ?, Description = ?, Address = ?, Latitude = ?, Longitude = ? WHERE Store_ID = ?');
+    $stmt->execute([$storeName, $description !== '' ? $description : null, $address, $latitude, $longitude, $storeId]);
+} catch (PDOException $exception) {
+    $_SESSION['flash_error'] = $exception->getCode() === '23000' ? 'ชื่อร้านค้านี้มีอยู่แล้ว' : 'ไม่สามารถแก้ไขข้อมูลร้านค้าได้ กรุณาลองใหม่อีกครั้ง';
+    header('Location: store_form.php?id=' . $storeId);
+    exit;
+}
 
 $_SESSION['flash_success'] = $stmt->rowCount() > 0 ? 'แก้ไขข้อมูลร้านค้าสำเร็จ' : 'ไม่พบข้อมูลร้านค้าหรือไม่มีข้อมูลเปลี่ยนแปลง';
 header('Location: admin_stores.php');

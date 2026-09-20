@@ -1,53 +1,16 @@
 <?php
 session_start();
-require_once __DIR__ . '/db.php';
 
 if (!empty($_SESSION['logged_in'])) {
     header('Location: index.php');
     exit;
 }
 
-$error = null;
-$oldUsername = '';
-$oldName = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $oldUsername = trim($_POST['username'] ?? '');
-    $oldName = trim($_POST['name'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirmPassword = $_POST['confirm_password'] ?? '';
-
-    if ($oldUsername === '' || $oldName === '' || $password === '') {
-        $error = 'กรุณากรอกข้อมูลให้ครบถ้วน';
-    } elseif (strlen($oldUsername) > 50 || strlen($oldName) > 100) {
-        $error = 'ชื่อผู้ใช้หรือชื่อแสดงผลยาวเกินกำหนด';
-    } elseif (strlen($password) < 8) {
-        $error = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
-    } elseif ($password !== $confirmPassword) {
-        $error = 'ยืนยันรหัสผ่านไม่ตรงกัน';
-    } else {
-        $checkStmt = $pdo->prepare('SELECT User_ID FROM `User` WHERE Username = ?');
-        $checkStmt->execute([$oldUsername]);
-
-        if ($checkStmt->fetch()) {
-            $error = 'ชื่อผู้ใช้นี้มีอยู่แล้ว';
-        } else {
-            $insertStmt = $pdo->prepare(
-                'INSERT INTO `User` (Username, Password, Name, Role) VALUES (?, ?, ?, ?)'
-            );
-            $insertStmt->execute([
-                $oldUsername,
-                password_hash($password, PASSWORD_BCRYPT),
-                $oldName,
-                'user',
-            ]);
-
-            $_SESSION['flash_success'] = 'สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ';
-            header('Location: login.php');
-            exit;
-        }
-    }
-}
+$flashError = $_SESSION['flash_error'] ?? null;
+unset($_SESSION['flash_error']);
+$oldUsername = $_SESSION['old_register_username'] ?? '';
+$oldName = $_SESSION['old_register_name'] ?? '';
+unset($_SESSION['old_register_username'], $_SESSION['old_register_name']);
 ?>
 <!doctype html>
 <html lang="th">
@@ -62,10 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card shadow-sm border-0" style="max-width: 500px; width: 100%;">
             <div class="card-body p-4 p-md-5">
                 <h1 class="h3 text-center mb-4">สมัครสมาชิก</h1>
-                <?php if ($error): ?>
-                    <div class="alert alert-danger" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php if ($flashError): ?>
+                    <div class="alert alert-danger" role="alert"><?= htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8') ?></div>
                 <?php endif; ?>
-                <form action="register.php" method="post">
+                <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
+                <form id="registerForm" action="auth_register.php" method="post" novalidate>
                     <div class="mb-3">
                         <label for="name" class="form-label">ชื่อ</label>
                         <input type="text" class="form-control" id="name" name="name" maxlength="100" value="<?= htmlspecialchars($oldName, ENT_QUOTES, 'UTF-8') ?>" required>
@@ -88,5 +52,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </main>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(function () {
+            $('#registerForm').on('submit', function (event) {
+                const username = $.trim($('#username').val());
+                const name = $.trim($('#name').val());
+                const password = $('#password').val();
+                const confirmPassword = $('#confirm_password').val();
+                let message = '';
+                if (!username || !name || !password || !confirmPassword) {
+                    message = 'กรุณากรอกข้อมูลให้ครบถ้วน';
+                } else if (password.length < 8) {
+                    message = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
+                } else if (password !== confirmPassword) {
+                    message = 'ยืนยันรหัสผ่านไม่ตรงกัน';
+                }
+                if (message) {
+                    event.preventDefault();
+                    $('#registerError').text(message).removeClass('d-none');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

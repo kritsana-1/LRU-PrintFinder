@@ -20,8 +20,14 @@ if ($storeName === '' || $address === '' || $latitude === false || $longitude ==
     exit;
 }
 
-$stmt = $pdo->prepare('INSERT INTO `Store` (Store_Name, Description, Address, Latitude, Longitude) VALUES (?, ?, ?, ?, ?)');
-$stmt->execute([$storeName, $description !== '' ? $description : null, $address, $latitude, $longitude]);
+try {
+    $stmt = $pdo->prepare('INSERT INTO `Store` (Store_Name, Description, Address, Latitude, Longitude) VALUES (?, ?, ?, ?, ?)');
+    $stmt->execute([$storeName, $description !== '' ? $description : null, $address, $latitude, $longitude]);
+} catch (PDOException $exception) {
+    $_SESSION['flash_error'] = $exception->getCode() === '23000' ? 'ชื่อร้านค้านี้มีอยู่แล้ว' : 'ไม่สามารถเพิ่มข้อมูลร้านค้าได้ กรุณาลองใหม่อีกครั้ง';
+    header('Location: store_form.php');
+    exit;
+}
 
 $_SESSION['flash_success'] = 'เพิ่มข้อมูลร้านค้าสำเร็จ';
 header('Location: admin_stores.php');
