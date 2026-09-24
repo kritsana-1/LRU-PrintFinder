@@ -81,7 +81,11 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                     <td><span class="badge rounded-pill text-bg-success">Active</span></td>
                                     <td class="text-nowrap">
                                         <a class="btn btn-sm btn-outline-primary" href="store_form.php?id=<?= (int) $store['Store_ID'] ?>">Edit</a>
+
                                         <button class="btn btn-sm btn-outline-danger js-delete-store" type="button" data-id="<?= (int) $store['Store_ID'] ?>" data-name="<?= htmlspecialchars($store['Store_Name'], ENT_QUOTES, 'UTF-8') ?>">Deactivate</button>
+
+                                        <button class="btn btn-sm btn-outline-danger js-delete-store" type="button" data-id="<?= (int) $store['Store_ID'] ?>" data-name="<?= htmlspecialchars($store['Store_Name'], ENT_QUOTES, 'UTF-8') ?>">Delete</button>
+
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

@@ -1,3 +1,4 @@
+```php
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
@@ -20,11 +21,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <i class="bi bi-shop"></i>จัดการร้านค้า
                 </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link <?= $currentPage === 'admin_locations.php' ? 'active' : '' ?>" href="admin_locations.php">
                     <i class="bi bi-geo-alt-fill"></i>ตำแหน่งที่ตั้ง
                 </a>
-            </li>
+            </li> -->
         </ul>
     </nav>
 </aside>
+```
